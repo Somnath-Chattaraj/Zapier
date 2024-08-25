@@ -12,8 +12,9 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^5.16.2",
+    "express": "^4.19.2",
     "kafkajs": "^2.2.4",
-    "prisma": "^5.16.2",
+    "prisma": "^5.18.0",
     "tsc": "^2.0.4"
   }
 }
