@@ -4,14 +4,13 @@ import HeroVideo from '@/components/HeroVideo'
 import { SessionProvider } from "next-auth/react"
 import React from 'react'
 
-export default function Home({
-  pageProps: { session, ...pageProps },
-}:{pageProps: { session: any }}) {
+export default function Home() {
   return (
-    <SessionProvider session={session}>
+    <>
       <AppBar signup={true} Login={true} contactSales={true} threeLines={true} network={true} />
       <Hero />
       <HeroVideo />
-    </SessionProvider>
+    </>
+
   );
 }

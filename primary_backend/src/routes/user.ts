@@ -9,20 +9,18 @@ export const userRouter = router.Router();
 
 userRouter.post('/signup', async (req: any, res: any) => {
     try {
-        const body = req.body.email;
         const parseData = SignupSchema.safeParse(req.body);
-
         if (!parseData.success) {
-            console.log(parseData);
             return res.status(400).json({
-                message: "Length required",
+                message: "Invalid data",
+                errors: parseData.error.errors
             });
         }
 
+        const { email, username, password } = parseData.data;
+
         const userExists = await prisma.user.findFirst({
-            where: {
-                email: body,
-            },
+            where: { email },
         });
 
         if (userExists) {
@@ -31,28 +29,30 @@ userRouter.post('/signup', async (req: any, res: any) => {
             });
         }
 
-        const password = await bcrypt.hash(req.body.password, 8);
+        const hashedPassword = await bcrypt.hash(password, 8);
         const user = await prisma.user.create({
             data: {
-                email: body,
-                name: req.body.username,
-                password: password,
+                email,
+                name: username,
+                password: hashedPassword,
             },
         });
 
-        const exp = Date.now() + 1000 * 60 * 60 * 24 * 30;
-        const token = jwt.sign({ sub: user.id, exp }, (process.env.SECRET||"123random"));
+        const exp = Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 30); // Expiry in seconds
+        const token = jwt.sign({ sub: user.id, exp }, process.env.SECRET || "123random");
+
         res.cookie("Authorization", token, {
             httpOnly: true,
             secure: false,
             sameSite: "lax",
         });
-        res.status(200).json({ message: "User signed up" });
+        res.status(201).json({ message: "User signed up" });
     } catch (error) {
         console.error("Signup Error: ", error);
         res.status(500).json({ message: "Internal server error" });
     }
 });
+
 
 userRouter.post('/login', async (req: any, res: any) => {
     try {

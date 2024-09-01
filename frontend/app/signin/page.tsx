@@ -35,10 +35,10 @@ const Signin = () => {
                       <span className="mx-4 text-gray-500">OR</span>
                       <div className="flex-grow border-t border-gray-400"></div>
                   </div>
-                  <div className='px-5 py-2 md-5'>
+                  {/* <div className='px-5 py-2 md-5'>
                           <label  className="block mb-2 text-sm  text-gray-900 font-semibold">*Name (required)</label>
                           <input type="text" id="first_name" onChange={(ev) => {setName(ev.target.value)}} className="bg-transparent border border-black text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
-                  </div>
+                  </div> */}
                   <div className='px-5 py-2 md-5'>
                           <label  className="block mb-2 text-sm  text-gray-900 font-semibold">*Email (required)</label>
                           <input type="text" id="first_name" onChange={(ev) => {setEmail(ev.target.value)}} className="bg-transparent border border-black text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
@@ -50,12 +50,17 @@ const Signin = () => {
                   {/* <PrimaryButton onClick={() => {router.push('/signup')}} children={'Get Started free'}/> */}
                   <div className='mt-4 mr-5'>
                   <SecondaryButton onClick={async() => {
-                      const res = await axios.post(`${BACKEND_URL}/api/v1/user/signup`, {
-                        username: email,
+                    try {
+                      const res = await axios.post(`${BACKEND_URL}/api/v1/user/login`, {
+                        email,
                         password,
-                        name
-                      })
+                      },{withCredentials: true});
                       router.push('/dashboard');
+                    } catch (error) {
+                      console.error("Error: ", error);
+                      alert("Error signing up");
+                    }
+                      
                   }} children={'Continue'}/>
 
                   </div>

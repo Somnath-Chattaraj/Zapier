@@ -2,12 +2,17 @@
 
 import AppBar from '@/components/AppBar'
 import { PrimaryButton } from '@/components/Button'
+import axios from 'axios';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React from 'react'
+import { BACKEND_URL } from '../config';
 
 const Signup = () => {
     const router = useRouter();
+    const [name, setName] = React.useState('');
+    const [email, setEmail] = React.useState('');
+    const [password, setPassword] = React.useState('');
   return (
     <div className='px-2 pd-10'>
         <AppBar signup={false} Login={true} contactSales={false} threeLines={false}  network={false} />
@@ -37,23 +42,38 @@ const Signup = () => {
                     <div className="flex-grow border-t border-gray-400"></div>
                 </div>
                 <div className='px-5 py-2'>
-                        <label  className="block mb-2 text-sm  text-gray-900 font-bold">*Work Email (required)</label>
-                        <input type="text" id="first_name" className="bg-transparent border border-black text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                        <label  className="block mb-2 text-sm  text-gray-900 font-bold">*Name (required)</label>
+                        <input onChange={(ev) => setName(ev.target.value)} type="text" id="first_name" className="bg-transparent border border-black text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
                 </div>
-                <div className='flex space-x-8 px-5 py-2 md-7'>
-
-                    <div className='w-full'>
+                <div className='px-5 py-2'>
+                        <label  className="block mb-2 text-sm  text-gray-900 font-bold">* Email (required)</label>
+                        <input onChange={(ev) => setEmail(ev.target.value)} type="text" id="first_name" className="bg-transparent border border-black text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                </div>
+                <div className='px-5 py-2'>
+                        <label  className="block mb-2 text-sm  text-gray-900 font-bold">*Password (required)</label>
+                        <input onChange={(ev) => setPassword(ev.target.value)} type="password" id="first_name" className="bg-transparent border border-black text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                </div>
+                    {/* <div className='w-full'>
                         <label  className="block mb-2 text-sm  text-gray-900 font-bold">*First name (required)</label>
                         <input type="text" id="first_name" className="bg-transparent border border-black text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
                     </div>
                     <div className='w-full'>
                         <label  className="block mb-2 w-full text-sm font-bold text-gray-900">*Last name (required)</label>
                         <input type="text" id="last_name" className="bg-transparent border border-black text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
-                    </div>
-
-                </div>
+                    </div> */}
                     
-                <PrimaryButton onClick={() => {router.push('/signup')}} children={'Get Started free'}/>
+                <PrimaryButton onClick={async () => {
+                    try {
+                        const res = await axios.post(`${BACKEND_URL}/api/v1/user/signup`, {
+                            username : name,
+                            email,
+                            password,
+                        },{withCredentials: true})
+                        router.push('/dashboard');
+                    } catch (error) {
+                        console.error("Error: ", error);
+                        alert("Error signing up");
+                }}} children={'Get Started free'}/>
                     <div className='px-5'>
                     By signing up, you agree to Zapier's <u>terms of service</u> and <u>privacy policy.</u>
                     </div>

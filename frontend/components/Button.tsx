@@ -16,6 +16,6 @@ export const SecondaryButton = ({children, onClick, size = "small"} : {
   size?: "small" | "medium" | "large"
 }) => {
   return (
-    <button onClick={onClick} className=" bg-transparent w-full hover:bg-gray-200 border border-black text-black font-semibold rounded-full px-10 mx-3 py-2"> {children} </button>
+    <button onClick={onClick} className=" bg-transparent hover:bg-gray-200 border border-black text-black font-semibold rounded-full px-10 mx-3 py-2"> {children} </button>
   )
 }

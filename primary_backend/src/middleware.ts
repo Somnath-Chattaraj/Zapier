@@ -1,13 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { prisma } from "./lib/prisma.js";
 
 interface AuthenticatedRequest extends Request {
     id?: string;
 }
 
 async function authMiddle(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-    const token = req.cookies?.Authorization; // Safely access the Authorization cookie
+    // Skip auth for certain routes
+    const openRoutes = ['/api/v1/user/signup', '/api/v1/user/login'];
+    if (openRoutes.includes(req.path)) {
+        return next();
+    }
+
+    const token = req.cookies?.Authorization;
     if (!token) {
         return res.sendStatus(401); // No token found
     }
