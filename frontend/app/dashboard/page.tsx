@@ -2,9 +2,8 @@
 import axios from 'axios';
 import React from 'react'
 import { BACKEND_URL } from '../config';
-// import toggleOn from '@/public/toggle-on.svg';
-// import toggleOff from '@/public/toggle-off.svg';
 import AppBar from '@/components/AppBar';
+import { useRouter } from 'next/navigation';
 
 interface Zap {
     "id": number,
@@ -39,6 +38,8 @@ function useZap() {
     }
 }
 const dashboard = () => {
+  
+  const route = useRouter();
     const [on,setOn] = React.useState(false);
     const toggleOn = (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,12 +53,15 @@ const dashboard = () => {
         </svg>
       );
       const {loading, zaps} = useZap();
-      
+      const id = zaps[0]?.id || 1;
     return (
       <>
         <AppBar signup={false} contactSales={true} threeLines={true} Login={false} network={true} />
         <div className="w-full flex flex-col p-6">
-          <p className="text-4xl my-5 font-bold">My Zaps (default folder)</p>
+          <div className='w-full flex justify-between'>
+            <p className="text-4xl my-5 font-bold">My Zaps (default folder)</p>
+            <button className='bg-purple-600 hover:bg-purple-500 h-12 px-10 my-5 text-white font-bold' onClick={() => {route.push('/zap/create')}}>Create</button>
+          </div>
           <table className="table-auto border-collapse w-full bg-white shadow-lg">
             <thead>
               <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
@@ -79,7 +83,7 @@ const dashboard = () => {
                 {/* <td className="py-3 px-6 text-left">1961</td> */}
                 <td className='py-3 pl-12' onClick={() => {setOn(!on)}}> {on?toggleOn:toggleOff} </td>
                 <td>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
+                <svg onClick={() =>{route.push(`/zap/${id}`)}} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
   <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
 </svg>
 

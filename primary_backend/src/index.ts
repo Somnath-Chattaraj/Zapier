@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import authMiddle from "./middleware";
 import cors from 'cors';
 import { zapRouter } from './routes/zap';
+import { triggerRouter } from './routes/trigger';
+import { actionRouter } from './routes/action';
 
 
 const app = express();
@@ -28,6 +30,8 @@ app.use(authMiddle);
 // API routes
 app.use("/api/v1/user/", userRouter);
 app.use("/api/v1/zap/", zapRouter);
+app.use("/api/v1/trigger", triggerRouter);
+app.use("/api/v1/action", actionRouter);
 
 // Error handling middleware
 app.use((err:any, req:any, res:any, next:any) => {

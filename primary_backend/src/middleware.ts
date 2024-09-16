@@ -7,7 +7,7 @@ interface AuthenticatedRequest extends Request {
 
 async function authMiddle(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     // Skip auth for certain routes
-    const openRoutes = ['/api/v1/user/signup', '/api/v1/user/login'];
+    const openRoutes = ['/api/v1/user/signup', '/api/v1/user/login', '/api/v1/trigger/available', '/api/v1/actions/available'];
     if (openRoutes.includes(req.path)) {
         return next();
     }
