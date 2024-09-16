@@ -1,102 +1,100 @@
-"use client";
-import axios from 'axios';
-import React from 'react'
-import { BACKEND_URL } from '../config';
-import AppBar from '@/components/AppBar';
-import { useRouter } from 'next/navigation';
+"use client"
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { BACKEND_URL, HOOKS_URL } from "../config";
+
+import { useRouter } from "next/navigation";
+import AppBar from "@/components/AppBar";
+import { DarkButton } from "@/components/buttons/DarkButton";
+import { LinkButton } from "@/components/buttons/LinkButton";
 
 interface Zap {
-    "id": number,
-    "name": string,
+    "id": string,
+    "triggerId": string,
     "userId": number,
-    "actions" : {
-        "id" : string,
+    "actions": {
+        "id": string,
         "zapId": string,
         "actionId": string,
         "sortingOrder": number,
-        "type" : {
-            "id" : string,
-            "name": string,
+        "type": {
+            "id": string,
+            "name": string
+            "image": string
         }
-    }[]
+    }[],
+    "trigger": {
+        "id": string,
+        "zapId": string,
+        "triggerId": string,
+        "type": {
+            "id": string,
+            "name": string,
+            "image": string
+        }
+    }
 }
 
-function useZap() {
-    const [loading, setLoading] = React.useState(true);
-    const [zaps, setZaps] = React.useState<Zap[]>([]);
+function useZaps() {
+    const [loading, setLoading] = useState(true);
+    const [zaps, setZaps] = useState<Zap[]>([]);
 
-    React.useEffect(() => {
-        axios.get(`${BACKEND_URL}/api/v1/zap`, {withCredentials: true}).then((res) => {
-            setZaps(res.data);
-            setLoading(false);
-        }).catch((err) => {
-            console.error(err);
-        });
+    useEffect(() => {
+        axios.get(`${BACKEND_URL}/api/v1/zap`, {
+            withCredentials: true
+        })
+            .then(res => {
+                setZaps(res.data.zaps);
+                setLoading(false)
+            })
     }, []);
     return {
         loading, zaps
     }
 }
-const dashboard = () => {
-  
-  const route = useRouter();
-    const [on,setOn] = React.useState(false);
-    const toggleOn = (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-        </svg>
-      );
+
+export default function() {
+    const { loading, zaps } = useZaps();
+    const router = useRouter();
     
-      const toggleOff = (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      );
-      const {loading, zaps} = useZap();
-      const id = zaps[0]?.id || 1;
-    return (
-      <>
-        <AppBar signup={false} contactSales={true} threeLines={true} Login={false} network={true} />
-        <div className="w-full flex flex-col p-6">
-          <div className='w-full flex justify-between'>
-            <p className="text-4xl my-5 font-bold">My Zaps (default folder)</p>
-            <button className='bg-purple-600 hover:bg-purple-500 h-12 px-10 my-5 text-white font-bold' onClick={() => {route.push('/zap/create')}}>Create</button>
-          </div>
-          <table className="table-auto border-collapse w-full bg-white shadow-lg">
-            <thead>
-              <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-              <td className="py-3 px-6 text-center"></td>
-                <th className="py-3 px-6 text-left">Name</th>
-                <th className="py-3 px-6 text-left">Last Edit</th>
-                <th className="py-3 px-6 text-left">Running</th>
-                <th className="py-3 px-6 text-left"></th>
-              </tr>
-            </thead>
-            {loading && <tbody className="text-gray-600 text-sm font-light">
-                    <tr>Loading</tr>
-                </tbody>}
-            {!loading && <tbody className="text-gray-600 text-sm font-light">
-              <tr className="border-b border-gray-200 hover:bg-gray-100">
-              <td className="py-3 px-6 text-center"><input type="checkbox" /></td>
-                <td className="py-3 px-6 text-left">The Sliding Mr. Bones (Next Stop, Pottersville)</td>
-                <td className="py-3 px-6 text-left">Malcolm Lockyer</td>
-                {/* <td className="py-3 px-6 text-left">1961</td> */}
-                <td className='py-3 pl-12' onClick={() => {setOn(!on)}}> {on?toggleOn:toggleOff} </td>
-                <td>
-                <svg onClick={() =>{route.push(`/zap/${id}`)}} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
-  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-</svg>
-
-                </td>
-              </tr>
-              
-            </tbody>}
-          </table>
+    return <div>
+        <AppBar signup={false} Login={false} contactSales={true} threeLines={true} network={true} />
+        <div className="flex justify-center pt-8">
+            <div className="max-w-screen-lg	 w-full">
+                <div className="flex justify-between pr-8 ">
+                    <div className="text-2xl font-bold">
+                        My Zaps
+                    </div>
+                    <DarkButton onClick={() => {
+                        router.push("/zap/create");
+                    }}>Create</DarkButton>
+                </div>
+            </div>
         </div>
-      </>
-    )
-  }
-  
+        {loading ? "Loading..." : <div className="flex justify-center"> <ZapTable zaps={zaps} /> </div>}
+    </div>
+}
 
-export default dashboard
+function ZapTable({ zaps }: {zaps: Zap[]}) {
+    const router = useRouter();
 
+    return <div className="p-8 max-w-screen-lg w-full">
+        <div className="flex">
+                <div className="flex-1">Name</div>
+                <div className="flex-1">ID</div>
+                <div className="flex-1">Created at</div>
+                {/* <div className="flex-1">Webhook URL</div> */}
+                <div className="flex-1">Go</div>
+        </div>
+        {zaps?.map(z => <div className="flex border-b border-t py-4">
+
+            <div className="flex-1 flex">{z.trigger.type.name} {z.actions.map(x => x.type.name + " ")}</div>
+            <div className="flex-1">{z.id}</div>
+            <div className="flex-1">Nov 13, 2023</div>
+            {/* <div className="flex-1">{`${HOOKS_URL}/hooks/catch/1/${z.id}`}</div> */}
+            <div className="flex-1"><LinkButton onClick={() => {
+                    router.push("/zap/" + z.id)
+                }}>Go</LinkButton></div>
+        </div>)}
+    </div>
+}
