@@ -9,28 +9,28 @@ import { DarkButton } from "@/components/buttons/DarkButton";
 import { LinkButton } from "@/components/buttons/LinkButton";
 
 interface Zap {
-    "id": string,
-    "triggerId": string,
-    "userId": number,
-    "actions": {
-        "id": string,
-        "zapId": string,
-        "actionId": string,
-        "sortingOrder": number,
-        "type": {
-            "id": string,
-            "name": string
-            "image": string
+    id: string;
+    triggerId: string;
+    userId: number;
+    actions: {
+        id: string;
+        zapId: string;
+        actionId: string;
+        sortingOrder: number;
+        type: {
+            id: string;
+            name: string;
+            image: string;
         }
-    }[],
-    "trigger": {
-        "id": string,
-        "zapId": string,
-        "triggerId": string,
-        "type": {
-            "id": string,
-            "name": string,
-            "image": string
+    }[];
+    trigger: {
+        id: string;
+        zapId: string;
+        triggerId: string;
+        type: {
+            id: string;
+            name: string;
+            image: string;
         }
     }
 }
@@ -44,9 +44,14 @@ function useZaps() {
             withCredentials: true
         })
             .then(res => {
-                setZaps(res.data.zaps);
-                setLoading(false)
+                console.log(res.data); // Add this line to inspect the response
+                setZaps(res.data);
+                setLoading(false);
             })
+            .catch(err => {
+                console.error("Error fetching zaps:", err);
+                setLoading(false);
+            });
     }, []);
     return {
         loading, zaps
@@ -71,30 +76,31 @@ export default function() {
                 </div>
             </div>
         </div>
-        {loading ? "Loading..." : <div className="flex justify-center"> <ZapTable zaps={zaps} /> </div>}
+        {loading ? "Loading..." : <div className="flex  justify-center"> <ZapTable zaps={zaps} /> </div>}
     </div>
 }
 
-function ZapTable({ zaps }: {zaps: Zap[]}) {
+function ZapTable({ zaps }: { zaps: Zap[] }) {
     const router = useRouter();
 
-    return <div className="p-8 max-w-screen-lg w-full">
-        <div className="flex">
+    return (
+        <div className="p-8 max-w-screen-lg w-full">
+            <div className="flex font-bold">
                 <div className="flex-1">Name</div>
                 <div className="flex-1">ID</div>
                 <div className="flex-1">Created at</div>
-                {/* <div className="flex-1">Webhook URL</div> */}
                 <div className="flex-1">Go</div>
+            </div>
+            {zaps?.map((z) => (
+                <div key={z.id} className="flex border-b border-t py-4">
+                    <div className="flex-1 text-">{z.trigger.type.name} {z.actions.map(x => x.type.name).join(", ")}</div>
+                    <div className="flex-1">{z.id}</div>
+                    <div className="flex-1">Nov 13, 2023</div>
+                    <div className="flex-1">
+                        <LinkButton onClick={() => router.push("/zap/" + z.id)}>Go</LinkButton>
+                    </div>
+                </div>
+            ))}
         </div>
-        {zaps?.map(z => <div className="flex border-b border-t py-4">
-
-            <div className="flex-1 flex">{z.trigger.type.name} {z.actions.map(x => x.type.name + " ")}</div>
-            <div className="flex-1">{z.id}</div>
-            <div className="flex-1">Nov 13, 2023</div>
-            {/* <div className="flex-1">{`${HOOKS_URL}/hooks/catch/1/${z.id}`}</div> */}
-            <div className="flex-1"><LinkButton onClick={() => {
-                    router.push("/zap/" + z.id)
-                }}>Go</LinkButton></div>
-        </div>)}
-    </div>
+    );
 }
