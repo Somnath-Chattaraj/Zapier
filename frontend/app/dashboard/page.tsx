@@ -85,22 +85,39 @@ function ZapTable({ zaps }: { zaps: Zap[] }) {
 
     return (
         <div className="p-8 max-w-screen-lg w-full">
-            <div className="flex font-bold">
+    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <div className="bg-gray-100 px-6 py-3">
+            <div className="flex font-bold text-gray-700">
                 <div className="flex-1">Name</div>
                 <div className="flex-1">ID</div>
-                <div className="flex-1">Created at</div>
-                <div className="flex-1">Go</div>
+                <div className="flex-1 px-2">Created at</div>
+                <div className="flex-1 ml-10">Go</div>
             </div>
-            {zaps?.map((z) => (
-                <div key={z.id} className="flex border-b border-t py-4">
-                    <div className="flex-1 text-">{z.trigger.type.name} {z.actions.map(x => x.type.name).join(", ")}</div>
-                    <div className="flex-1">{z.id}</div>
-                    <div className="flex-1">Nov 13, 2023</div>
-                    <div className="flex-1">
-                        <LinkButton onClick={() => router.push("/zap/" + z.id)}>Go</LinkButton>
+        </div>
+        <div className="divide-y divide-gray-200">
+            {zaps?.map((z, index) => (
+                <div 
+                    key={z.id} 
+                    className={`flex px-6 py-4 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} transition duration-200 ease-in-out hover:bg-gray-100`}
+                >
+                    <div className="flex-1 flex items-center text-gray-800">
+                        {/* <div className="font-medium">{z.trigger.type.name}</div> */}
+                        <div className="ml-2 text-sm flex justify-between text-gray-500"><img src={z.trigger.type.image} className="w-[30px] h-[30px]" /> {z.actions.map(x => <img src={x.type.image} className="w-[30px] h-[30px]" />)}</div>
+                    </div>
+                    <div className="flex-1 text-gray-800">{z.id}</div>
+                    <div className="flex-1 text-gray-600">Nov 13, 2023</div>
+                    <div className="flex-1 flex justify-center">
+                        <LinkButton 
+                            onClick={() => router.push("/zap/" + z.id)} 
+                        >
+                            Go
+                        </LinkButton>
                     </div>
                 </div>
             ))}
         </div>
+    </div>
+</div>
+
     );
 }
