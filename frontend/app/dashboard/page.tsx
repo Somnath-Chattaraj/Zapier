@@ -91,6 +91,7 @@ function ZapTable({ zaps }: { zaps: Zap[] }) {
                 <div className="flex-1">Name</div>
                 <div className="flex-1">ID</div>
                 <div className="flex-1 px-2">Created at</div>
+                <div className="flex-1 px-2">Webhook URL</div>
                 <div className="flex-1 ml-10">Go</div>
             </div>
         </div>
@@ -106,6 +107,7 @@ function ZapTable({ zaps }: { zaps: Zap[] }) {
                     </div>
                     <div className="flex-1 text-gray-800">{z.id}</div>
                     <div className="flex-1 text-gray-600">Nov 13, 2023</div>
+                    <div className="flex-1 text-gray-600"> {`${HOOKS_URL}/hooks/catch/1/${z.id}`} </div>
                     <div className="flex-1 flex justify-center">
                         <LinkButton 
                             onClick={() => router.push("/zap/" + z.id)} 
