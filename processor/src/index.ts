@@ -1,43 +1,44 @@
-import { PrismaClient } from '@prisma/client'
-import { Kafka } from 'kafkajs'
+import { PrismaClient } from "@prisma/client";
+import {Kafka} from "kafkajs";
 
-const TOPIC_NAME = 'zap-events';
+const TOPIC_NAME = "zap-events"
+
+const client = new PrismaClient();
 
 const kafka = new Kafka({
     clientId: 'outbox-processor',
     brokers: ['localhost:9092']
 })
 
-const client = new PrismaClient()
-
 async function main() {
-    const producer = kafka.producer();
+    const producer =  kafka.producer();
     await producer.connect();
-    
-    try {
-        while (true) {
-            const pendingRows = await client.zapRunOutbox.findMany({
-                where: {},
-                take: 10
-            })
-            
-            if (pendingRows.length > 0) {
-                await producer.send({
-                    topic: TOPIC_NAME,
-                    messages: pendingRows.map(r => ({
-                        value: r.zapRunId.toString()  // Ensure value is a string
-                    }))
-                })
-            }
 
-            // Add a delay to avoid tight loop
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-    } catch (error) {
-        console.error('Error in processing:', error);
-    } finally {
-        await producer.disconnect();
-        await client.$disconnect();
+    while(1) {
+        const pendingRows = await client.zapRunOutbox.findMany({
+            where :{},
+            take: 10
+        })
+        console.log(pendingRows);
+
+        producer.send({
+            topic: TOPIC_NAME,
+            messages: pendingRows.map(r => {
+                return {
+                    value: JSON.stringify({ zapRunId: r.zapRunId, stage: 0 })
+                }
+            })
+        })  
+
+        await client.zapRunOutbox.deleteMany({
+            where: {
+                id: {
+                    in: pendingRows.map(x => x.id)
+                }
+            }
+        })
+
+        await new Promise(r => setTimeout(r, 3000));
     }
 }
 

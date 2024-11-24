@@ -11,40 +11,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
 const kafkajs_1 = require("kafkajs");
-const TOPIC_NAME = 'zap-events';
+const TOPIC_NAME = "zap-events";
+const client = new client_1.PrismaClient();
 const kafka = new kafkajs_1.Kafka({
     clientId: 'outbox-processor',
     brokers: ['localhost:9092']
 });
-const client = new client_1.PrismaClient();
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const producer = kafka.producer();
         yield producer.connect();
-        try {
-            while (true) {
-                const pendingRows = yield client.zapRunOutbox.findMany({
-                    where: {},
-                    take: 10
-                });
-                if (pendingRows.length > 0) {
-                    yield producer.send({
-                        topic: TOPIC_NAME,
-                        messages: pendingRows.map(r => ({
-                            value: r.zapRunId.toString() // Ensure value is a string
-                        }))
-                    });
+        while (1) {
+            const pendingRows = yield client.zapRunOutbox.findMany({
+                where: {},
+                take: 10
+            });
+            console.log(pendingRows);
+            producer.send({
+                topic: TOPIC_NAME,
+                messages: pendingRows.map(r => {
+                    return {
+                        value: JSON.stringify({ zapRunId: r.zapRunId, stage: 0 })
+                    };
+                })
+            });
+            yield client.zapRunOutbox.deleteMany({
+                where: {
+                    id: {
+                        in: pendingRows.map(x => x.id)
+                    }
                 }
-                // Add a delay to avoid tight loop
-                yield new Promise(resolve => setTimeout(resolve, 1000));
-            }
-        }
-        catch (error) {
-            console.error('Error in processing:', error);
-        }
-        finally {
-            yield producer.disconnect();
-            yield client.$disconnect();
+            });
+            yield new Promise(r => setTimeout(r, 3000));
         }
     });
 }

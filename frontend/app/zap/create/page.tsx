@@ -104,12 +104,12 @@ function useAvailableActionsAndTriggers() {
         axios.get(`${BACKEND_URL}/api/v1/trigger/available`,{
             withCredentials: true
         })
-            .then(x => setAvailableTriggers(x.data.availableTriggers))
+            .then(x => setAvailableTriggers(x.data))
 
         axios.get(`${BACKEND_URL}/api/v1/action/available`,{
             withCredentials: true
         })
-            .then(x => setAvailableActions(x.data.availableActions))
+            .then(x => setAvailableActions(x.data))
     }, [])
 
     return {
