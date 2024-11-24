@@ -25,7 +25,8 @@ zapRouter.post('/',authMiddle ,  async (req:any, res:any) => {
                 actions: {
                     create: parsedData.data.actions.map((x,index) => ({
                         actionId: x.availableActionId,
-                        sortingOrder: index
+                        sortingOrder: index,
+                        metadata: x.actionMetadata
                     }))
                 }
             }
