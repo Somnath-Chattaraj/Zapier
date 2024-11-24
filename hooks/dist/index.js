@@ -36,6 +36,6 @@ app.post('/hooks/catch/:userId/:zapId', (req, res) => __awaiter(void 0, void 0, 
     }));
     res.json({ message: 'Webhook received' });
 }));
-app.listen(3000, () => {
-    console.log('Server running on port 3000');
+app.listen(3002, () => {
+    console.log('Server running on port 3002');
 });
