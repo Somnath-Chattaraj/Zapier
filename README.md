@@ -1,5 +1,11 @@
 # Zapier Clone
-
+[![GitHub release](https://img.shields.io/github/v/release/Somnath-Chattaraj/Zapier)](https://github.com/Somnath-Chattaraj/Zapier/releases)
+[![GitHub issues](https://img.shields.io/github/issues/Somnath-Chattaraj/Zapier)](https://github.com/Somnath-Chattaraj/Zapier/issues)
+[![GitHub forks](https://img.shields.io/github/forks/Somnath-Chattaraj/Zapier)](https://github.com/Somnath-Chattaraj/Zapier/network)
+[![GitHub stars](https://img.shields.io/github/stars/Somnath-Chattaraj/Zapier)](https://github.com/Somnath-Chattaraj/Zapier/stargazers)
+[![License: Royalty License](https://img.shields.io/badge/License-Royalty-blue)](https://github.com/Somnath-Chattaraj/Zapier/blob/master/LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ### **Overview**
 
 This is a scalable and modular Zapier clone designed to handle webhooks, email notifications, and Solana blockchain integration. Built with modern technologies, the platform ensures robust performance, efficient task automation, and seamless integration capabilities.
