@@ -24,89 +24,119 @@ async function main() {
     await consumer.subscribe({ topic: TOPIC_NAME, fromBeginning: true })
 
     await consumer.run({
-        autoCommit: false,
-        eachMessage: async ({ topic, partition, message }) => {
-          console.log({
-            partition,
-            offset: message.offset,
-            value: message.value?.toString(),
-          })
-          if (!message.value?.toString()) {
-            return;
+  autoCommit: false,
+  eachMessage: async ({ topic, partition, message }) => {
+    const rawValue = message.value?.toString();
+    console.log({
+      partition,
+      offset: message.offset,
+      value: rawValue,
+    });
+
+    if (!rawValue) {
+      console.warn("⚠️ Empty Kafka message, skipping...");
+      await commitOffset();
+      return;
+    }
+
+    let parsedValue;
+    try {
+      parsedValue = JSON.parse(rawValue);
+    } catch (err) {
+      console.warn("⚠️ Invalid JSON in message, skipping...");
+      await commitOffset();
+      return;
+    }
+
+    const zapRunId = parsedValue.zapRunId;
+    const stage = parsedValue.stage;
+
+    if (!zapRunId || typeof stage !== "number") {
+      console.warn("⚠️ Missing zapRunId or stage, skipping...");
+      await commitOffset();
+      return;
+    }
+
+    const zapRunDetails = await prismaClient.zapRun.findFirst({
+      where: { id: zapRunId },
+      include: {
+        zap: {
+          include: {
+            actions: { include: { type: true } }
           }
-
-          const parsedValue = JSON.parse(message.value?.toString());
-          const zapRunId = parsedValue.zapRunId;
-          const stage = parsedValue.stage;
-
-          const zapRunDetails = await prismaClient.zapRun.findFirst({
-            where: {
-              id: zapRunId
-            },
-            include: {
-              zap: {
-                include: {
-                  actions: {
-                    include: {
-                      type: true
-                    }
-                  }
-                }
-              },
-            }
-          });
-          const currentAction = zapRunDetails?.zap.actions.find(x => x.sortingOrder === stage);
-
-          if (!currentAction) {
-            console.log("Current action not found?");
-            return;
-          }
-
-          const zapRunMetadata = zapRunDetails?.metadata;
-
-          if (currentAction.type.id === "email") {
-            const body = parse((currentAction.metadata as JsonObject)?.body as string, zapRunMetadata);
-            const to = parse((currentAction.metadata as JsonObject)?.email as string, zapRunMetadata);
-            console.log(`Sending out email to ${to} body is ${body}`)
-            await sendEmail(to, body);
-          }
-
-          if (currentAction.type.id === "send-sol") {
-
-            const amount = parse((currentAction.metadata as JsonObject)?.amount as string, zapRunMetadata);
-            const address = parse((currentAction.metadata as JsonObject)?.address as string, zapRunMetadata);
-            console.log(`Sending out SOL of ${amount} to address ${address}`);
-            await sendSol(address, amount);
-          }
-          
-          // 
-          await new Promise(r => setTimeout(r, 500));
-
-          const lastStage = (zapRunDetails?.zap.actions?.length || 1) - 1; // 1
-          console.log(lastStage);
-          console.log(stage);
-          if (lastStage !== stage) {
-            console.log("pushing back to the queue")
-            await producer.send({
-              topic: TOPIC_NAME,
-              messages: [{
-                value: JSON.stringify({
-                  stage: stage + 1,
-                  zapRunId
-                })
-              }]
-            })  
-          }
-
-          console.log("processing done");
-          // 
-          await consumer.commitOffsets([{
-            topic: TOPIC_NAME,
-            partition: partition,
-            offset: (parseInt(message.offset) + 1).toString() // 5
-          }])
         },
-      })
+      }
+    });
+
+    if (!zapRunDetails?.zap?.actions) {
+      console.warn(`⚠️ No zap or actions found for zapRunId ${zapRunId}, skipping...`);
+      await commitOffset();
+      return;
+    }
+
+    const currentAction = zapRunDetails.zap.actions.find(x => x.sortingOrder === stage);
+    if (!currentAction) {
+      console.warn(`⚠️ No action found at stage ${stage}, skipping...`);
+      await commitOffset();
+      return;
+    }
+
+    const zapRunMetadata = zapRunDetails.metadata;
+
+    try {
+      if (currentAction.type.id === "email") {
+        const body = parse((currentAction.metadata as JsonObject)?.body as string, zapRunMetadata);
+        const to = parse((currentAction.metadata as JsonObject)?.email as string, zapRunMetadata);
+        if (!to || !body) throw new Error("Invalid email action fields");
+
+        console.log(`📧 Sending out email to ${to} | Body: ${body}`);
+        await sendEmail(to, body);
+      }
+
+      if (currentAction.type.id === "send-sol") {
+        const amount = parse((currentAction.metadata as JsonObject)?.amount as string, zapRunMetadata);
+        const address = parse((currentAction.metadata as JsonObject)?.address as string, zapRunMetadata);
+        if (!amount || !address) throw new Error("Invalid SOL action fields");
+
+        console.log(`🪙 Sending out SOL of ${amount} to address ${address}`);
+        await sendSol(address, amount);
+      }
+    } catch (err) {
+      console.error("❌ Action execution failed:", err);
+      await commitOffset(); // still commit to avoid retry loop on bad input
+      return;
+    }
+
+    await new Promise(r => setTimeout(r, 500));
+
+    const lastStage = (zapRunDetails.zap.actions.length || 1) - 1;
+    if (stage < lastStage) {
+      console.log("➡️ Pushing next stage to queue...");
+      await producer.send({
+        topic,
+        messages: [{
+          value: JSON.stringify({
+            zapRunId,
+            stage: stage + 1
+          })
+        }]
+      });
+    }
+
+    console.log("✅ Processing done.");
+
+    await commitOffset();
+
+    // commitOffset helper to avoid repeating the same logic
+    async function commitOffset() {
+      await consumer.commitOffsets([{
+        topic,
+        partition,
+        offset: (parseInt(message.offset) + 1).toString()
+      }]);
+    }
+  },
+});
 
 }
 

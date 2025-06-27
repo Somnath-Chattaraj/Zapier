@@ -14,10 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEmail = sendEmail;
 const nodemailer_1 = __importDefault(require("nodemailer"));
-// SOL_PRIVATE_KEY=""
-// SMTP_USERNAME=""
-// SMTP_PASSWORD=""
-// SMTP_ENDPOINT
+// Transport config
 const transport = nodemailer_1.default.createTransport({
     host: process.env.SMTP_ENDPOINT,
     port: 587,
@@ -29,12 +26,22 @@ const transport = nodemailer_1.default.createTransport({
 });
 function sendEmail(to, body) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield transport.sendMail({
-            from: "contact@100xdevs.com",
-            sender: "contact@100xdevs.com",
-            to,
-            subject: "Hello from Zapier",
-            text: body
-        });
+        try {
+            if (!to || !body) {
+                throw new Error(`Invalid email or body: to=${to}, body=${body}`);
+            }
+            yield transport.sendMail({
+                from: "workflow@gmail.com",
+                sender: "workflow@gmail.com",
+                to,
+                subject: "Hello from workflow",
+                text: body,
+            });
+            console.log(`✅ Email sent to ${to}`);
+        }
+        catch (err) {
+            console.error(`❌ Failed to send email to ${to}:`, err);
+            throw err;
+        }
     });
 }
