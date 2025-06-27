@@ -19,7 +19,7 @@ export async function sendEmail(to: string, body: string) {
         from: "contact@100xdevs.com",
         sender: "contact@100xdevs.com",
         to,
-        subject: "Hello from Zapier",
+        subject: "Hello from workflow",
         text: body
     })
 }
