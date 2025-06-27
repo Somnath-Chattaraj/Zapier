@@ -1,4 +1,4 @@
-# Zapier Clone
+# AutoFlow
 [![GitHub release](https://img.shields.io/github/v/release/Somnath-Chattaraj/Zapier)](https://github.com/Somnath-Chattaraj/Zapier/releases)
 [![GitHub issues](https://img.shields.io/github/issues/Somnath-Chattaraj/Zapier)](https://github.com/Somnath-Chattaraj/Zapier/issues)
 [![GitHub forks](https://img.shields.io/github/forks/Somnath-Chattaraj/Zapier)](https://github.com/Somnath-Chattaraj/Zapier/network)
@@ -8,7 +8,7 @@
 [![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ### **Overview**
 
-This is a scalable and modular Zapier clone designed to handle webhooks, email notifications, and Solana blockchain integration. Built with modern technologies, the platform ensures robust performance, efficient task automation, and seamless integration capabilities.
+This is a scalable and modular workflow designed to handle webhooks, email notifications, and Solana blockchain integration. Built with modern technologies, the platform ensures robust performance, efficient task automation, and seamless integration capabilities.
 
 ### **Features**
 
@@ -31,7 +31,7 @@ This is a scalable and modular Zapier clone designed to handle webhooks, email n
 ---
 
 ### **System Design**
-
+![System Design](frontend/public/image.png)
 
 ---
 
